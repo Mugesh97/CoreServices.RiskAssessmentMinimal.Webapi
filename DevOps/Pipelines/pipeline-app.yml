@@ -1,0 +1,56 @@
+pr: none
+trigger:
+  batch: false
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - DevOps/*
+    - README_Resources/*
+    - SQL/*
+    - README.md
+
+variables:
+  major: 1
+  minor: 0
+  patch: $[counter(format('{0}.{1}-{2}', variables['major'], variables['minor'], variables['Build.SourceBranchName']), 1)]
+  ${{ if eq( variables['Build.SourceBranchName'], 'main' ) }}: 
+    branch: ''
+  ${{ if ne( variables['Build.SourceBranchName'], 'main' ) }}: 
+    branch: -${{ variables['Build.SourceBranchName'] }}
+
+name: $(major).$(minor).$(patch)$(branch)
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+### Pre build tests
+- template: ./Templates/Stages/stage-tests-pre-build.yml
+  parameters:
+    name: Pre_Build_Tests
+    displayName: Pre-Build Tests
+    variables:
+    - template: ../Variables/variables-global.yml
+
+### Build and publish app
+- template: ./Templates/Stages/stage-publish-app.yml
+  parameters:
+    name: Publish_App
+    displayName: Publish App
+    dependsOn: Pre_Build_Tests
+    variables:
+    - template: ../Variables/variables-global.yml
+
+### Deploy App
+- template: ./Templates/Stages/stage-deploy-app.yml
+  parameters:
+    name: Deploy_App
+    displayName: Deploy App
+    dependsOn: Publish_App
+    variables:
+     - template: ../Variables/variables-global.yml
+     - template: ../Variables/variables-bvt.yml
+    environment: BVT

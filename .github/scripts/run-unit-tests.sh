@@ -1,0 +1,1 @@
+dotnet test -c Release --collect:"XPlat Code Coverage" --logger trx --results-directory "TestsResults" --settings codecoverage.runsettings

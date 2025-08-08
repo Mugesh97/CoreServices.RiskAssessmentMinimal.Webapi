@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: '#{ingressGateway_name}'
+  namespace: '#{namespace}'
+spec:
+  selector:
+    istio: '#{ingressGateway_name}' # Use ingress gateway in namespace
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: lmkcloud-certs
+    hosts:
+    - '#{service_url}' # Domain name of the external website this needs to be changed at deploy time.
+---
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: '#{ingressGateway_name}'
+  namespace: '#{namespace}'
+spec:
+  hosts:
+    - '#{service_url}' # Domain name of the external website this needs to be changed at deploy time. 
+  gateways:
+    - '#{ingressGateway_name}'
+  http:
+    - route:
+      - destination:
+          host: '#{service_name}'

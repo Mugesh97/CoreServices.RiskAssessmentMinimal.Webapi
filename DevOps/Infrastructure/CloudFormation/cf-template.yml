@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates resources required for the edrs action listener service .
+Parameters:  
+  RepositoryInternalName:
+    Type: String
+    Description: Name of the internal image repository
+  Environment:
+    Type: String
+    Description: The deployment environment
+
+Resources:
+  RepositoryInternal:
+    Type: 'AWS::ECR::Repository'
+    Properties:
+      RepositoryName: !Ref RepositoryInternalName
+      Tags:
+        - Key: Name
+          Value: !Ref RepositoryInternalName
+        - Key: Environment
+          Value: !Ref Environment

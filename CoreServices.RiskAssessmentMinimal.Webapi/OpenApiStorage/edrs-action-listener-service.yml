@@ -1,0 +1,1012 @@
+openapi: 3.0.1
+info:
+  version: "1.0.0"
+  title: Landmark edrs actions listener Service Apis
+  description: ""
+tags:
+  - name:  edrs-action-listener-service
+servers:
+  - url: https://api.landmarkcloudservices.com/
+  - url: https://api-external.landmarkcloudservices.com/
+
+paths:
+  #case
+   /case:
+    post:
+      summary: To submit edrs details
+      operationId: edrsSubmit
+      x-internal-entitlement: internal:edrs-action-listener-service:edrs:submit
+      tags:
+        - edrsSubmit
+      requestBody:
+        description: Request body containing edrs submit data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/edrsSubmitWrapper"
+       
+      responses:
+        201:
+          description: Case submitted successfully
+          headers:
+            traceresponse:
+              $ref: "#/components/headers/lgsTraceResponse"
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403Forbidden'
+        404:
+          $ref: '#/components/responses/404NotFound'
+        500:
+          $ref: '#/components/responses/500InternalServerError'
+
+  #attachment
+   /attachment:
+    post:
+      summary: To submit edrs attachment details
+      operationId: edrsAttachment
+      x-internal-entitlement: internal:edrs-action-listener-service:edrs:attachment
+      tags:
+        - edrsAttachment
+      requestBody:
+        description: Request body containing edrs attachment data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/edrsAttachmentWrapper"
+       
+      responses:
+        201:
+          description: Case submitted successfully
+          headers:
+            traceresponse:
+              $ref: "#/components/headers/lgsTraceResponse"
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403Forbidden'
+        404:
+          $ref: '#/components/responses/404NotFound'
+        500:
+          $ref: '#/components/responses/500InternalServerError'
+
+  #CasesCleanup
+   /CasesCleanup:
+    delete:
+      summary: To CasesCleanup edrs details
+      operationId: edrsCasesCleanup
+      x-internal-entitlement: internal:edrs-action-listener-service:edrs:casesCleanup
+      tags:
+        - edrsCasesCleanup
+      parameters:
+        - name: caseId
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-zA-Z0-9@ :#$%^&+=*;()_+-\/,.']*$"
+            maxLength: 30
+       
+      responses:
+        201:
+          description: cases removed successfully
+          headers:
+            traceresponse:
+              $ref: "#/components/headers/lgsTraceResponse"
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403Forbidden'
+        404:
+          $ref: '#/components/responses/404NotFound'
+        500:
+          $ref: '#/components/responses/500InternalServerError'
+  
+  
+components:
+  schemas:
+
+    #CommonRequestModel
+    commonRequestModel:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+          description: "The ID of the user."
+        userName:
+          type: string
+          nullable: true
+          description: "The name of the user."
+        password:
+          type: string
+          nullable: true
+          description: "The password for authentication."
+        edrsServiceType:
+          type: string
+          nullable: true
+          description: "The type of EDRS service."
+        callbackUrl:
+          type: string
+          nullable: true
+          description: "The callbackurl of EDRS service."   
+      description: "Base request model containing common properties for user and EDRS service."
+
+    #documentCopyType          
+    documentCopyType:
+      type: string
+      enum:
+        - Original
+        - Certified
+        - Scanned
+      description: "Specifies the type of document copy."
+
+    #document
+    document:
+      type: object
+      required:
+        - attachmentId
+      properties:
+        attachmentId:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+        copyType:
+          $ref: '#/components/schemas/documentCopyType'
+
+    edrsSubmitWrapper:
+      type: object
+      required:
+        - eDRSSubmit
+      properties:
+        eDRSSubmit:
+          $ref: "#/components/schemas/edrsSubmitData"
+
+    edrsSubmitData:
+      type: object
+      required:
+        - caseId
+        - caseManagementSystemReference
+        - isAP1WarningUnderstood
+        - totalFeeInPence
+        - applicationDate
+        - isApplicationAffectWhole
+        - disclosableOveridingInterests
+        - submittingConveyancer
+        - applications
+      additionalProperties: false
+      properties:
+        additionalProviderFilter:
+          type: string
+          maxLength: 500
+        conveyancerId:
+          type: string
+          maxLength: 500
+        caseId:
+          type: string
+          maxLength: 500
+        caseManagementSystemReference:
+          type: string
+          maxLength: 500
+        isAP1WarningUnderstood:
+          type: boolean
+        totalFeeInPence:
+          anyOf:
+            - type: string
+            - type: integer
+        applicationDate:
+          type: string
+        localAuthority:
+          type: string
+          maxLength: 500
+        propertyPostcode:
+          type: string
+          maxLength: 500
+        titleNumbers:
+          $ref: '#/components/schemas/titleNumbers'
+        isApplicationAffectWhole:
+          type: boolean
+        disclosableOveridingInterests:
+          type: boolean
+        submittingConveyancer:
+          $ref: '#/components/schemas/submittingConveyancer'
+        otherConveyancers:
+          type: array
+          items:
+            $ref: '#/components/schemas/otherConveyancer'
+        unrepresentedParties:
+          $ref: '#/components/schemas/unrepresentedParties'
+        applications:
+          anyOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/applicationBase'
+            - type: null
+        supportingDocuments:
+          type: array
+          items:
+            $ref: '#/components/schemas/supportingDocument'
+        additionalPartyNotifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/additionalPartyNotification'
+        postSubmissionAdditionalAttachments:
+          anyOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/postSubmissionAdditionalAttachments'
+            - type: null
+        metadataId:
+          anyOf:
+            - type: string
+              maxLength: 500
+            - type: null
+        hmlrCredentialsSet:
+          type: boolean
+        caseFiles:
+          anyOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/caseFiles'
+            - type: null
+        state:
+          anyOf:
+            - type: string
+              maxLength: 500
+            - type: null
+        notes:
+          anyOf:
+            - type: array
+              items:
+            - type: null
+        callbackUrl:
+          type: string
+          nullable: true
+          description: "The callbackurl of EDRS service." 
+        userId:
+          type: string
+          nullable: true
+                      
+    edrsAttachmentWrapper:
+      type: object
+      required:
+        - eDRSAttachment
+      properties:
+        eDRSAttachment:
+          $ref: "#/components/schemas/edrsAttachmentData"
+
+
+    #edrsAttachmentData
+    edrsAttachmentData:
+      allOf:
+        - $ref: '#/components/schemas/commonRequestModel'
+      type: object
+      required:
+        - applicationMessageId
+        - externalReference
+        - item
+      additionalProperties: false
+      properties:
+        applicationMessageId:
+          type: string
+          pattern: "^[a-zA-Z0-9@ :#$%^&+=*;()_+-\/,.']*$"
+        externalReference:
+          type: string
+          pattern: "^[a-zA-Z0-9@ :#$%^&+=*;()_+-\/,.']*$"
+        item:
+          $ref: '#/components/schemas/item'
+        callbackUrl:
+          type: string
+          pattern: '[\s\S]*'
+          maxLength: 1000
+        additionalProviderFilter:
+          type: string
+          maxLength: 500
+        event:
+          $ref: '#/components/schemas/logEventsDto'
+
+    #item      
+    item:
+      type: object
+      required:
+        - itemType
+      properties:
+        itemType:
+          type: string
+          enum:
+            - Attachment
+            - Note
+      discriminator:
+        propertyName: itemType
+      description: "Base class for items such as Attachment and Note."
+
+    #attachment  
+    attachment:
+      allOf:
+        - $ref: '#/components/schemas/item'
+      type: object
+      required:
+        - identifier
+        - copyType
+        - content
+      properties:
+        identifier:
+          $ref: '#/components/schemas/identifier'
+        copyType:
+          $ref: '#/components/schemas/documentCopyType'
+        content:
+          $ref: '#/components/schemas/attachmentContent'
+      description: "Attachment class derived from Item."
+
+    #note      
+    note:
+      allOf:
+        - $ref: '#/components/schemas/item'
+      type: object
+      required:
+        - notes
+      properties:
+        notes:
+          type: string
+          pattern: '[\s\S]*'
+      description: "Note class derived from Item."
+
+    #postSubmissionAdditionalAttachments
+    postSubmissionAdditionalAttachments:
+      allOf:
+        - $ref: '#/components/schemas/document'
+      type: object
+      required:
+        - identifier
+      properties:
+        identifier:
+          $ref: '#/components/schemas/identifier'
+        GroupId:
+          type: string
+
+    #caseFiles
+    caseFiles:
+      type: object
+      properties:
+        caseFileId:
+          type: string
+        fileName:
+          type: string
+
+    #identifier      
+    identifier:
+      type: object
+      required:
+        - identifierType
+      properties:
+        identifierType:
+          type: string
+          enum:
+            - AttachmentId
+            - Application
+            - DocumentName
+          description: "The type of the identifier."
+      discriminator:
+        propertyName: identifierType
+        mapping:
+          AttachmentId: '#/components/schemas/attachmentIdIdentifier'
+          Application: '#/components/schemas/applicationIdentifier'
+          DocumentName: '#/components/schemas/documentNameIdentifier'
+      description: "Base class for identifiers."
+
+    applicationIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/identifier'
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          $ref: '#/components/schemas/appType'
+          description: "The application type associated with the identifier."
+      description: "Identifier for applications."
+
+    documentNameIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/identifier'
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          $ref: '#/components/schemas/documentNameType'
+          description: "The document name type associated with the identifier."
+      description: "Identifier for document names."
+
+    #attachmentIdIdentifier
+    attachmentIdIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/identifier'
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: integer
+          format: int32
+          minimum: 1
+          nullable: true
+          description: "The attachment ID associated with the identifier. Must be a positive integer."
+      description: "Identifier for attachment IDs."
+    
+    #attachmentContent
+    attachmentContent:
+      type: object
+      additionalProperties: false
+      properties:
+        name: 
+          type: string
+          pattern: '[\s\S]*'
+          maximum: 500
+        data:
+          type: string
+          pattern: '[\s\S]*'
+          maximum: 500
+
+    #logEventsDto
+    logEventsDto:
+      type: object
+      required:
+        - legalEntity
+        - product
+        - applicationName
+        - environment
+        - sessionId
+        - userId
+      properties:
+        legalEntity:
+          type: string
+          description: "The legal entity associated with the event."
+        product:
+          type: string
+          description: "The product associated with the event."
+        applicationName:
+          type: string
+          description: "The name of the application triggering the event."
+        environment:
+          type: string
+          description: "The environment in which the event occurred (e.g., Development, Production)."
+        sessionId:
+          type: string
+          description: "The session ID for the user."
+        userId:
+          type: string
+          description: "The user ID associated with the event."
+        eventName:
+          type: string
+          default: "HmlrBusinessGateway"
+          description: "The name of the event. Defaults to 'HmlrBusinessGateway'."
+        timeStamp:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "The timestamp of the event. Automatically set to the current UTC time."
+
+    #titleNumbers
+    titleNumbers:
+      type: object
+      required:
+        - titles
+        - titleNumbersType
+      additionalProperties: false
+      properties:
+        titles:
+          type: array
+          items:
+            type: string
+            pattern: "^[A-Z]{0,3}[0-9]{1,6}[ZT]?$"
+        titleNumbersType:
+          type: string
+          enum:
+            - dealing
+            - transferOfPart
+            - newLease
+            - leaseExtension
+        additionalTitles:
+          type: array
+          items:
+            type: string
+        lesseeTitle:
+          type: string
+          nullable: true
+
+    #submittingConveyancer
+    submittingConveyancer:
+      type: object
+      required:
+        - representees
+        - caseReference
+        - email
+        - phoneNo
+      additionalProperties: false
+      properties:
+        representees:
+          type: array
+          items:
+            $ref: '#/components/schemas/applicationParty'
+        caseReference:
+          type: string
+          maximum: 500
+        email:
+          type: string
+          maximum: 500
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        phoneNo:
+          type: string
+          maximum: 500
+          pattern: "^[0-9]+$"
+        name:
+          type: string
+          maximum: 500
+
+    #otherConveyancer
+    otherConveyancer:
+      type: object
+      required:
+        - representees
+        - reference
+        - name
+        - address
+      additionalProperties: false
+      properties:
+        representees:
+          type: array
+          items:
+            $ref: '#/components/schemas/applicationParty'
+        reference:
+          type: string
+          maximum: 500
+        name:
+          type: string
+          maximum: 500
+        address:
+          $ref: '#/components/schemas/mailAddress'
+
+    #unrepresentedParties
+    unrepresentedParties:
+      type: object
+      additionalProperties: false
+      properties:
+        partiesVerifiedByIdForms:
+          type: array
+          items:
+            $ref: '#/components/schemas/partyVerifiedByIdForm'
+        partiesVerifiedWithoutIdForms:
+          type: array
+          items: 
+            $ref: '#/components/schemas/applicationParty'
+
+    #applicationParty
+    applicationParty:
+      type: object
+      required:
+        - party
+        - isApplicant
+      properties:
+        party:
+          $ref: '#/components/schemas/party'
+        isApplicant:
+          type: boolean
+        correspondenceAddress:
+          $ref: '#/components/schemas/addressForDocuments'
+
+    #party
+    party:
+      type: object
+      required:
+        - partyType
+        - roles
+      properties:
+        surname:
+          type: string
+        forename:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+        partyType:
+          type: string
+          enum:
+            - person
+            - company
+        name:
+          type: string
+        overseasTerritory:
+           type: string
+        overseasNumberInTheUnitedKingdom:
+           type: string
+
+     
+    #role
+    role:
+      type: object
+      required:
+        - applicationId
+        - type
+      additionalProperties: false
+      properties:
+        applicationId:
+          type: string
+          maximum: 500
+        type:
+          $ref: '#/components/schemas/roleType'
+
+    #addressForDocuments
+    addressForDocuments:
+      type: object
+      required:
+        - addressForDocumentsType
+      properties:
+        addressForDocumentsType:
+          $ref: '#/components/schemas/addressForDocumentsType'
+        additionalAddress1:
+            anyOf:
+            - type: object
+              properties:
+                addressType:
+                  type: string
+                email:
+                  type: string
+            - type: null
+        additionalAddress2:
+            anyOf:
+            - type: object
+              properties:
+                addressType:
+                  type: string
+                email:
+                  type: string
+            - type: null
+        postalAddress:
+          $ref: '#/components/schemas/postalAddress'
+
+    #postalAddress
+    postalAddress:
+      type: object
+      required:
+        - addressLine1
+      properties:
+        addressType:
+          type: string
+        mailAddressType:
+          $ref: '#/components/schemas/mailAddressType'
+        addressLine1:
+          type: string
+          pattern: ".*\\S.*"
+          description: "First line of the address. Cannot be blank."
+        addressLine2:
+          type: string
+          pattern: ".*\\S.*"
+          description: "Second line of the address. Optional but must not be blank if provided."
+        addressLine3:
+          type: string
+          pattern: ".*\\S.*"
+          description: "Third line of the address. Optional but must not be blank if provided."
+        addressLine4:
+          type: string
+          pattern: ".*\\S.*"
+          description: "Fourth line of the address. Optional but must not be blank if provided."
+        city:
+          type: string
+          pattern: ".*\\S.*"
+          description: "City name. Cannot be blank."
+        county:
+          type: string
+          pattern: ".*\\S.*"
+          description: "County name. Optional but must not be blank if provided."
+        country:
+          type: string
+          pattern: ".*\\S.*"
+          description: "Country name. Cannot be blank."
+        postCode:
+          type: string
+          pattern: ".*\\S.*"
+          description: "Postcode. Cannot be blank."
+
+    #mailAddress
+    mailAddress:
+      type: object
+      required:
+        - mailAddressType
+      properties:
+        mailAddressType:
+          $ref: '#/components/schemas/mailAddressType'
+
+    #PartyVerifiedByIdForm
+    partyVerifiedByIdForm:
+      type: object
+      properties:
+        party:
+          $ref: '#/components/schemas/party'
+        isApplicant:
+          type: boolean
+        correspondenceAddress:
+          $ref: '#/components/schemas/addressForDocuments'
+        identityForm:
+          type: object
+        copyType:
+          type: string
+        attachmentId:
+          type: integer
+          nullable: true
+
+
+    applicationBase:
+      allOf:
+        - $ref: '#/components/schemas/document'
+      type: object
+      required:
+        - applicationId
+        - value
+        - feeInPence
+        - generalType
+      properties:
+        applicationId:
+          type: string
+          maxLength: 500
+          nullable: true
+        value:
+          type: string
+          maxLength: 500
+        feeInPence:
+          type: integer
+          format: int64
+        applicationType:
+          type: string
+          maxLength: 500
+          nullable: true
+        generalType:
+          type: string
+          enum:
+            - charge
+            - other
+        lendersSortCode:
+          type: string
+          pattern: "^[a-zA-Z0-9@ :#$%^&+=*;()_+-\/,.']*$"
+          nullable: true
+        mdRef:
+          type: string
+          pattern: "^[a-zA-Z0-9@ :#$%^&+=*;()_+-\/,.']*$"
+          nullable: true
+        chargeDate:
+          type: string
+          nullable: true
+
+
+    supportingDocument:
+      anyOf:
+        - $ref: '#/components/schemas/document'
+      type: object
+      required:
+        - documentName
+      properties:
+        documentName:
+          $ref: '#/components/schemas/documentNameType'
+
+    #address
+    address:
+      type: object
+      required:
+        - addressType
+      properties:
+        addressType:
+          type: string
+
+
+    #additionalPartyNotification
+    additionalPartyNotification:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+          maximum: 500
+        reference:
+          type: string
+          pattern: ".*\\S.*"
+          maximum: 500
+        address:
+          $ref: '#/components/schemas/address'
+
+    #enums
+
+    #appType
+    appType:
+      type: string
+      enum:
+        - AN1
+        - AP1
+        - APT
+        - AS1
+        - AS2
+        - AS3
+        - CCD  # CAG Removed in version 2.1
+        - CH2
+        - CH3
+        - CN
+        - CNL
+        - COA
+        - CPD
+        - DIS
+        - DJP
+        - DSP
+        - EX1
+        - EX3
+        - HR1
+        - HR2
+        - HR4
+        - LEASE
+        - NOE
+        - NOL
+        - PC
+        - RC
+        - RFN
+        - ROCA
+        - ROCC
+        - ROCU
+        - ROE
+        - RX1
+        - RX2
+        - RX3
+        - RX4
+        - SBC
+        - SEV
+        - SL
+        - TNV
+        - TP1
+        - TP2
+        - TR1
+        - TR2
+        - TR4
+        - TRM
+        - TSC
+        - UN1
+        - UN2
+        - UN3
+        - UN4
+        - UT1
+        - VC
+        - VLAN
+        - VLAP
+        - VLUN
+        - VOCA
+        - VOCU
+        - VOE
+        - VOEA
+        - VOEU
+        - WCT
+        - ADV1
+        - ADV2
+        - CN1
+        - DB
+        - DOL
+        - RGOE
+        - SC
+
+    #identifierType
+    identifierType:
+      type: string
+      enum:
+        - AttachmentId
+        - Application
+        - DocumentName
+
+    #documentNameType    
+    documentNameType:
+      type: string
+      enum:
+        - Abstract
+        - Agreement
+        - Assignment
+        - Conveyance
+        - Correspondence
+        - CourtOrder
+        - Deed
+        - FormDI
+        - DocumentList
+        - Evidence
+        - EX1A
+        - IdentityEvidence
+        - IdentityForm
+        - Indenture
+        - LandTransactionTax
+        - Lease
+        - Licence
+        - LRCorrespondence
+        - PowerofAttorney
+        - StampDutyLandTax
+        - StatementOfTruth
+        - StatutoryDeclaration
+        - WitnessStatement
+        - Assent
+        - BirthCertificate
+        - Charge
+        - DeathCertificate
+        - Discharge
+        - MarriageCertificate
+        - Probate
+        - SubCharge
+        - Transfer
+        - Plan
+      description: "Enum representing various document name types."
+
+    #roleType
+    roleType:
+      type: string
+      enum:
+        - borrower
+        - lender
+        - personalRepresentative
+        - proprietor
+        - thirdParty
+        - transferee
+        - transferor
+        - lessee
+        - lessor
+        - powerOfAttorney
+
+    #AddressForDocumentsType
+    addressForDocumentsType:
+      type: string
+      enum:
+        - subjectPropertyAddress
+        - sellersAddress
+        - transferOrAssentAddress
+        - specificAddress
+
+    #mailAddressType
+    mailAddressType:
+      type: string
+      enum:
+        - postal
+        - dx
+        - DX
+
+  headers:
+    lgsTraceResponse:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/headers/lgsTraceResponse"
+
+  responses:
+    400BadRequest:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/400BadRequest"
+    401Unauthorized:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/401Unauthorized"
+    403Forbidden:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/403Forbidden"
+    404NotFound:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/404NotFound"
+    409Conflict:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/409Conflict"
+    413PayloadTooLarge:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/413PayloadTooLarge" 
+    429TooManyRequests:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/429TooManyRequests"     
+    500InternalServerError:
+      $ref: "../../../apihub--apihub--published-lgs/2.7.0/lgs-openAPI-errorResponse.yaml#/components/responses/500InternalServerError"
+ 
+  securitySchemes:
+    bearerAuth:
+     type: http
+     scheme: bearer
+     bearerFormat: JWT
+
+security:
+- bearerAuth: []     
+

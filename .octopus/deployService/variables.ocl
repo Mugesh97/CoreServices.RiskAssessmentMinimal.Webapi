@@ -1,0 +1,610 @@
+variable "appSettings_AZURE_TENANT_ID" {
+    value "2b7f516e-1b14-479e-8d65-ac50c9127e5d" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_AzureAccessTokenServiceSettings__GetAccessTokenUsingAzureLogin" {
+    value "false" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_AzureAccessTokenServiceSettings__TenantId" {
+    value "2b7f516e-1b14-479e-8d65-ac50c9127e5d" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_AzureAccessTokenServiceSettings__TokenAuthority" {
+    value "https://login.microsoftonline.com/{0}/oauth2/token" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__HostName" {
+    value "amqp://bvt-rabbitmqcluster.rabbitmq-bvt.svc" {
+        environment = ["development"]
+    }
+
+    value "amqp://uat-rabbitmqcluster.rabbitmq-uat.svc" {
+        description = ""
+        environment = ["staging"]
+    }
+
+    value "amqp://prd-rabbitmqcluster.rabbitmq-prd.svc" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__UserName" {
+    value "edrsactionlistener" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__Queue" {
+    value "eas_GateWayRequestQueue" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__Port" {
+    value "5672" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__DeadLetterQueue" {
+    value "eas_DeadLetterQueue" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_RabbitMqSettings__DeadLetterExchange" {
+    value "eas_DeadLetterExchange" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryIssuer" {
+    value "https://sts.windows.net/2b7f516e-1b14-479e-8d65-ac50c9127e5d/" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryUrl" {
+    value "https://login.microsoftonline.com/liguk.onmicrosoft.com/" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__EntitlementServiceTokenIssuer" {
+    value "https://core-bvt-entitlement.lmkcloud.net/entitlements" {
+        environment = ["development"]
+    }
+
+    value "https://core-uat-entitlement.lmkcloud.net/entitlements" {
+        description = ""
+        environment = ["staging"]
+    }
+
+    value "https://core-prd-entitlement.lmkcloud.net/entitlements" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__EntitlementServiceUrl" {
+    value "https://bvt-api.landmarkcloudservices.com/entitlements/" {
+        environment = ["development"]
+    }
+
+    value "https://uat-api.landmarkcloudservices.com/entitlements/" {
+        description = ""
+        environment = ["staging"]
+    }
+
+    value "https://api.landmarkcloudservices.com/entitlements/" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__SchemaServiceAppIdUri" {
+    value "api://eng-core-bvt-schema-service-functionapp-internal-permissions" {
+        environment = ["development"]
+    }
+
+    value "api://eng-core-uat-schema-service-functionapp-internal-permissions" {
+        description = ""
+        environment = ["staging"]
+    }
+
+    value "api://eng-core-prd-schema-service-functionapp-internal-permissions" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__SchemaServiceUrl" {
+    value "https://bvt-api-internal.landmarkcloudservices.com/schema" {
+        environment = ["development"]
+    }
+
+    value "https://uat-api-internal.landmarkcloudservices.com/schema" {
+        description = ""
+        environment = ["staging"]
+    }
+
+    value "https://api-internal.landmarkcloudservices.com/schema" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__Mode" {
+    value "internal" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__PermissionOpenApiAttribute" {
+    value "x-internal-entitlement" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_TokenValidatorSettings__Active" {
+    value "true" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_TokenValidatorSettings__AzureActiveDirectoryIssuer" {
+    value "https://sts.windows.net/2b7f516e-1b14-479e-8d65-ac50c9127e5d/" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "environment" {
+    value "bvt" {
+        environment = ["development"]
+    }
+
+    value "uat" {
+        environment = ["staging"]
+    }
+
+    value "prd" {
+        environment = ["production"]
+    }
+}
+
+variable "service_configMap_name" {
+    value "#{service_name}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "service_version" {
+    value "#{Octopus.Release.Number}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "azureDevOps_PipelineName" {
+    value "Integration Test UAT" {
+        environment = ["staging"]
+    }
+
+    value "Integration Test BVT" {
+        environment = ["development"]
+    }
+}
+
+variable "azureDevOps_OrganizationName" {
+    value "lmk-onprem-deployments" {
+        environment = ["development", "staging"]
+    }
+}
+
+variable "appSettings_ApplicationInsights__ConnectionString" {
+    value "InstrumentationKey=3889fa33-aa2e-4684-b3d2-994f1d576041;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=8b95052b-24f2-450f-8408-77ba34ad2595" {
+        environment = ["development"]
+    }
+
+    value "InstrumentationKey=a84ad6cb-97f8-4ab6-802f-e514272e9bb4;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=2c933ec2-06ff-4f6c-ae23-f67a634a44fd" {
+        environment = ["staging"]
+    }
+
+    value "InstrumentationKey=64c26c3c-b896-4f21-bf8f-d82059cbb174;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=f948230e-2e96-4457-8ada-62ca739a17e8" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_AZURE_CLIENT_ID" {
+    value "f798c40e-706e-41d9-9d87-028deeef0fd2" {
+        environment = ["development"]
+    }
+
+    value "543d4331-692f-48d4-a801-edceba2d8305" {
+        environment = ["staging"]
+    }
+
+    value "0186b46c-515a-4cd1-8bb4-ab341c3434c1" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_AzureAccessTokenServiceSettings__ClientId" {
+    value "f798c40e-706e-41d9-9d87-028deeef0fd2" {
+        environment = ["development"]
+    }
+
+    value "543d4331-692f-48d4-a801-edceba2d8305" {
+        environment = ["staging"]
+    }
+
+    value "0186b46c-515a-4cd1-8bb4-ab341c3434c1" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__AuthenticationSettings__Audience" {
+    value "api://eng-core-bvt-actionlistener-webapi-internal-permissions" {
+        environment = ["development"]
+    }
+
+    value "api://eng-core-uat-actionlistener-webapi-internal-permissions" {
+        environment = ["staging"]
+    }
+
+    value "api://eng-core-prd-actionlistener-webapi-internal-permissions" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_TokenValidatorSettings__ApplicationName" {
+    value "EDRS Action Listener" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_TokenValidatorSettings__ResourceAppIdUri" {
+    value "api://eng-core-bvt-actionlistener-webapi-internal" {
+        environment = ["development"]
+    }
+
+    value "api://eng-core-uat-actionlistener-webapi-internal" {
+        environment = ["staging"]
+    }
+
+    value "api://eng-core-prd-actionlistener-webapi-internal" {
+        environment = ["production"]
+    }
+}
+
+variable "azureDevOps_ProjectName" {
+    value "EDRS Action Listener" {
+        environment = ["development", "staging"]
+    }
+}
+
+variable "namespace" {
+    value "edrs-action-listener-#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "service_name" {
+    value "edrs-action-listener-webapi-#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "service-ecr-image" {
+    value "175803919121.dkr.ecr.eu-west-1.amazonaws.com/core-actionlistener-service-onprem:#{Octopus.Release.Number}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrEdrsBaseUrl" {
+    value "bvt-intelliworks.ochresoft.lmkcloud.net/eDRSSimulator" {
+        environment = ["staging"]
+    }
+
+    value "bgtest.landregistry.gov.uk/b2b" {
+        environment = ["development"]
+    } 
+
+    value "businessgateway.landregistry.gov.uk/b2b" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrRequisitionPollRequestWebService" {
+    value "/LRegCorrespondenceV2Poll.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/CorrespondenceV2_1PollRequestWebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/CorrespondenceV2_1PollRequestWebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrSubmitCaseWebService" {
+    value "/LRegEDocumentRegistrationV2.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/EDocumentRegistrationV2_1WebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/EDocumentRegistrationV2_1WebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrAttachmentCaseWebService" {
+    value "/LRegAttachmentV2.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/AttachmentV2_1WebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/AttachmentV2_1WebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrAttachmentPollRequestWebService" {
+    value "/LRegAttachmentV2Poll.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/AttachmentV2_1PollRequestWebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/AttachmentV2_1PollRequestWebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrEarlyCompletionRequestWebService" {
+    value "/LRegEarlyCompletionV2.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/EarlyCompletionV2_1PollRequestWebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/EarlyCompletionV2_1PollRequestWebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrSubmitPollRequestWebService" {
+    value "/LRegEDocumentRegistrationV2Poll.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/ECDRS_StubService/EDocumentRegistrationV2_1PollRequestWebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/EDocumentRegistrationV2_1PollRequestWebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__HmlrOutstandingPollRequestWebService" {
+    value "/LROutstandingRequestsV2.asmx" {
+        environment = ["staging"]
+    }
+
+    value "/BGStubService/OutstandingRequestsV2_1WebService" {
+        environment = ["development"]
+    }
+
+    value "/ECDRS_SoapEngine/OutstandingRequestsV2_1WebService" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__ECSSCALLBACKURL" {
+    value "https://#{environment}-api-internal.landmarkcloudservices.com/ecss/InvokeCallback" {
+        environment = ["development", "staging"]
+    }
+
+    value "https://api-internal.landmarkcloudservices.com/ecss/InvokeCallback" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrEndPointSettings__ECSSServiceAppId" {
+    value "api://eng-core-bvt-edrs-case-state-service-functionapp-internal-permissions/.default" {
+        environment = ["development"]
+    }
+
+    value "api://eng-core-prd-edrs-case-state-service-functionapp-internal-permissions/.default" {
+        environment = ["production"]
+    }
+
+    value "api://eng-core-uat-edrs-case-state-service-functionapp-internal-permissions/.default" {
+        environment = ["staging"]
+    }
+}
+
+variable "appSettings_SchemaValidationSettings__NewtonSoftSchemaKey" {
+    value "4328-o3cZ1Qy+F3O0mUjRtoM5N4InR7WlrFR72VQrZVWjihFttZApLIJaskU5v8qckeDZ3rGvoVF+IOYrQAuWofoB0VGXDcAykP8fZzfEumvl9nISf7cOB3HM7XbVvppz+EccuE65nzXm6zpDVJErJHfr3I/b5oaUDheWDPjlYGNyiKV7IklkIjo0MzI4LCJFeHBpcnlEYXRlIjoiMjAyMS0wOS0wNVQwNzozMzo1NC41MzgxODc5WiIsIlR5cGUiOiJKc29uU2NoZW1hU2l0ZSJ9" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_ASPNETCORE_ENVIRONMENT" {
+    value "#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_NO_PROXY" {
+    value "vault-internal.nonlive-vault.svc" {
+        environment = ["development", "staging"]
+    }
+
+    value "vault-internal.live-vault.svc" {
+        environment = ["production"]
+    }
+}
+
+variable "service_imagePullSecrets_name" {
+    value "edrs-action-listener-reg-cred" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "resources-limits-memory" {
+    value "300M" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "resources-limits-cpu" {
+    value "30m" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "resources-requests-memory" {
+    value "200M" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "resources-requests-cpu" {
+    value "20m" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__VAULT_ROLE" {
+    value "edrs-action-listener-webapi-bvt-r" {
+        environment = ["development"]
+    }
+
+    value "edrs-action-listener-webapi-uat-r" {
+        environment = ["staging"]
+    }
+
+    value "edrs-action-listener-webapi-prd-r" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__VAULT_ADDR" {
+    value "http://vault-internal.live-vault.svc:8200" {
+        environment = ["production"]
+    }
+
+    value "http://vault-internal.nonlive-vault.svc:8200" {
+        environment = ["development", "staging"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__SA_TOKEN_PATH" {
+    value "/var/run/short-lived-token/token" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__VAULT_PATH" {
+    value "edrs-action-listener-webapi" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__VAULT_MOUNT" {
+    value "bvt" {
+        environment = ["development"]
+    }
+
+    value "uat" {
+        environment = ["staging"]
+    }
+
+    value "prd" {
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__CertifcateSecretName" {
+    value "hmlrCertificate" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__CertifcatePasswordSecretName" {
+    value "hmlrCertificatePassword" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__hmlrRootCA" {
+    value "hmlrRootCA" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HmlrCertificateSettings__hmlrIssuingCA" {
+    value "hmlrIssuingCA" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "appSettings_HTTPS_PROXY" {
+    value "http://z1prdproxyvip01.corp.edrlandmark.net:3128" {
+        environment = ["development", "staging"]
+    }
+
+    value "http://z2prdproxyvip01.corp.edrlandmark.net:3128" {
+        description = ""
+        environment = ["production"]
+    }
+}
+
+variable "appSettings_HTTP_PROXY" {
+    value "http://z2prdproxyvip01.corp.edrlandmark.net:3128" {
+        description = ""
+        environment = ["production"]
+    }
+
+    value "http://z1prdproxyvip01.corp.edrlandmark.net:3128" {
+        environment = ["development", "staging"]
+    }
+}
+
+variable "appSettings_EnvironmentSettings__Environment" {
+    value "bvt" {
+        environment = ["development"]
+    }
+
+    value "uat" {
+        environment = ["staging"]
+    }
+
+    value "prd" {
+        environment = ["production"]
+    }
+}

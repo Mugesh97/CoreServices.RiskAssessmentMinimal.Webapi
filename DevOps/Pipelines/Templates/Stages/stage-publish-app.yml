@@ -1,0 +1,98 @@
+parameters:
+- name: name
+  displayName: Stage Name
+  type: string
+
+- name: displayName
+  displayName: Stage Display Name
+  type: string
+
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+stages:
+- stage: ${{ parameters.name }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  jobs:
+  - job: Publish_Pipeline_Artifacts
+    displayName: Publish Pipeline Artifacts
+    steps:
+    
+    # - script: |
+    #     choco install netfx-4.8-devpack --yes
+    #   displayName: Install .NET Framework 4.8 Developer 
+
+    ### Install required .Net version
+    - task: UseDotNet@2
+      name: Use_Dot_Net_Version
+      displayName: Use .NET ${{ variables.dotNetVersion }}
+      inputs:
+        packageType: sdk
+        version: ${{ variables.dotNetVersion }}
+        installationPath: $(Agent.ToolsDirectory)/dotnet    
+
+    ### Restore NuGet packages
+    - task: DotNetCoreCLI@2
+      name: Restore_NuGet_Packages
+      displayName: Restore NuGet Packages
+      inputs:
+        command: restore
+        feedsToUse: config
+        nugetConfigPath: ${{ variables.nugetConfigPath }}
+
+    ### Build Web Api
+    - task: DotNetCoreCLI@2
+      name: Build_Web_Api
+      displayName: Build Web Api
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: ${{ variables.webApiProject }}
+        arguments: --no-restore --configuration Release --output $(Pipeline.Workspace)/Publish/WebApi -p:version=$(Build.BuildNumber)
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    ### Publish Web Api pipeline artifact
+    - task: PublishBuildArtifacts@1
+      name: Publish_Web_Api
+      displayName: Publish Web Api
+      inputs:
+        PathtoPublish: $(Pipeline.Workspace)/Publish/WebApi
+        ArtifactName: webApi
+        publishLocation: Container
+
+    ### Publish Docker file pipeline artifact
+    - task: PublishBuildArtifacts@1
+      name: Publish_Docker_File
+      displayName: Publish Docker File
+      inputs:
+        PathtoPublish: ${{ variables.dockerFile }}
+        ArtifactName: dockerFile
+        publishLocation: Container
+
+    # ### Publish Integration tests pipeline artifact
+    # - task: PublishBuildArtifacts@1
+    #   name: Publish_Integration_Tests
+    #   displayName: Publish Integration Tests
+    #   inputs:
+    #     PathtoPublish: ${{ variables.integrationTestsSourceFolder }}
+    #     ArtifactName: integrationTests
+    #     publishLocation: Container

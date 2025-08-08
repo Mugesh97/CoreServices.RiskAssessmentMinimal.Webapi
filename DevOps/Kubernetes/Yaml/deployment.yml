@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata: 
+  name: '#{service_name}'
+  namespace: '#{namespace}'
+spec:
+  selector:
+    matchLabels:
+      app: '#{service_name}'
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: '#{service_name}'
+        version: '#{service_version}'
+    spec:
+      serviceAccountName: '#{service_name}-sa'
+      containers:
+      - name: '#{service_name}'
+        image: '#{service-ecr-image}'
+        envFrom:
+        - configMapRef:
+            name: '#{service_configMap_name}'
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: '#{resources-requests-cpu}'
+            memory: '#{resources-requests-memory}'
+          limits:
+            cpu: '#{resources-limits-cpu}'
+            memory: '#{resources-limits-memory}'
+        volumeMounts:
+        - name: short-lived-token
+          mountPath: /var/run/short-lived-token
+      volumes:
+      - name: short-lived-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              audience: '#{service_name}'
+              expirationSeconds: 3600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: '#{service_name}'
+  namespace: '#{namespace}'
+spec:
+  selector:
+    app: '#{service_name}'
+  ports:
+    - name: http
+      port: 8080
+  type: ClusterIP

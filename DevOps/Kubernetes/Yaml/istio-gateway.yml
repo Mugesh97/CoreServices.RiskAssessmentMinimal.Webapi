@@ -1,0 +1,31 @@
+kind: IstioOperator # run using istioctl
+apiVersion: install.istio.io/v1alpha1
+metadata:
+  name: '#{ingressGateway_name}' # must be unique in the cluster
+spec:
+  profile: empty # Do not install CRDs or the control plane
+  components:
+    ingressGateways:
+    - name: '#{ingressGateway_name}'
+      namespace: '#{namespace}'
+      enabled: true
+      label:
+        istio: '#{ingressGateway_name}'
+        version: 1.0.0
+      k8s:
+        resources:
+        hpaSpec:
+          minReplicas: 2 
+        podDisruptionBudget:
+          minAvailable: 1
+        service:
+          ports:
+            - name: https
+              port: 443
+              targetPort: 30368
+              nodePort: #{nodePort}
+  values:
+    gateways:
+      istio-ingressgateway:
+        # Enable gateway injection
+        injectionTemplate: gateway

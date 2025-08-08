@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# VSSpell002: Ignore Word
+dotnet_diagnostic.VSSpell002.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none

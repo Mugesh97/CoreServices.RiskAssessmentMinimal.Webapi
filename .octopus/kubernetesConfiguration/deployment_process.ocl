@@ -1,0 +1,176 @@
+step "create-namespace" {
+    name = "Create Namespace"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\namespace.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\namespace.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "deploy-service-account-and-roles" {
+    name = "Deploy Service Account and Roles"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps/Kubernetes/Yaml/serviceaccount-roles.yaml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "True"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps/Kubernetes/Yaml/serviceaccount-roles.yaml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "deploy-aws-helper-config-map" {
+    name = "Deploy AWS Helper Config Map"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\aws-configmap.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\aws-configmap.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "deploy-aws-helper-pod" {
+    name = "Deploy AWS Helper Pod"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\aws-helper.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\aws-helper.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "run-aws-helper" {
+    name = "Run AWS Helper Pod"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesRunScript"
+        properties = {
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                $namespace = $OctopusParameters["namespace"]
+                
+                kubectl create job ecr-token-helper --from=cronjob/ecr-token-helper -n $namespace
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+    }
+}
+
+step "get-istio-file" {
+    name = "Get Istio File"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.Script"
+        properties = {
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                $tempFile = $OctopusParameters["istioTempFile"]
+                $filePath = "C:\Kubernetes\tmp\$tempFile"
+                $patToken = $OctopusParameters["githubPAT"]
+                $repo = $OctopusParameters["githubRepo"]
+                $branch = $OctopusParameters["Octopus.Release.Git.BranchName"]
+                
+                If (Test-Path $filePath) {
+                    Write-Output "Removing existing file: $filePath"
+                    Remove-Item $filePath
+                }
+                
+                $headers = @{
+                    "Content-Type" = "application/json"
+                    "Authorization" = "Bearer $patToken"
+                }
+                
+                $uri = "https://raw.githubusercontent.com/Landmark-Information-Group/$repo/$branch/DevOps/Kubernetes/Yaml/istio-gateway.yml"
+                
+                Write-Output "Getting yml from GitHub: $uri"
+                
+                $response = Invoke-WebRequest -Method GET -Uri $uri -Headers $headers -UseBasicParsing
+                
+                $response.content > $filePath
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+    }
+}
+
+step "install-istio-gateway" {
+    name = "Install Istio Gateway"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.Script"
+        properties = {
+            Octopus.Action.EnabledFeatures = "Octopus.Features.SubstituteInFiles"
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                $tempFile = $OctopusParameters["istioTempFile"]
+                $filePath = "C:\Kubernetes\tmp\$tempFile"
+                $istioexe = $OctopusParameters["istioExeLocation"]
+                $kubecfg = $OctopusParameters["kubeConfigLocation"]
+                
+                Write-Output "The file is: $filePath"
+                Write-Output "The istio exe is: $istioexe"
+                Write-Output "The kube config is: $kubecfg"
+                Write-Output "Installing Istio"
+                
+                istioctl -c $kubecfg install -f $filePath -y
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+            Octopus.Action.SubstituteInFiles.OutputEncoding = "utf-8"
+            Octopus.Action.SubstituteInFiles.TargetFiles = "C:\\Kubernetes\\tmp\\#{istioTempFile}"
+        }
+    }
+}

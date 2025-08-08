@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lmkcloud-certs
+  namespace: '#{namespace}'
+type: kubernetes.io/tls
+data:
+  tls.crt: '#{Octopus.Action[Get Certificate].Output.certificateVariable | ToBase64}'
+  tls.key: '#{Octopus.Action[Get Certificate].Output.privateKeyVariable | ToBase64}'

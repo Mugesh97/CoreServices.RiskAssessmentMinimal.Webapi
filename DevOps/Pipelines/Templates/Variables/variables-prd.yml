@@ -1,0 +1,16 @@
+variables:
+  ### Pipeline variables
+  serviceConnectionName: eng-coreservices-edrs-action-listener-prd
+  appIdUriDirect: api://eng-core-prd-actionlistener-webapi-internal
+  appIdUriApiHub: api://eng-core-prd-actionlistener-webapi-internal-permissions
+
+  ### Bicep variables
+  tags.environment: prd
+  resourceGroupUKS.name: core-prd-actionlistener-webapi-uks
+  resourceGroupUKS.location: uksouth
+  logAnalytics.name: core-prd-actionlistener-webapi-loganalytics-uks
+  logAnalytics.retentionInDays: 30
+  logAnalytics.dailyQuotaGb: 1
+  logAnalytics.resourceGroup: $(resourceGroupUKS.name)
+  applicationInsights.name: core-prd-actionlistener-webapi-appinsights-uks
+  applicationInsights.resourceGroup: $(resourceGroupUKS.name)

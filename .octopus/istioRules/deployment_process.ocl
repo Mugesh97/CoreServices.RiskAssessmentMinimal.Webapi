@@ -1,0 +1,69 @@
+step "get-certificate" {
+    name = "Get Certificate"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesRunScript"
+        properties = {
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                $namespace = $OctopusParameters["namespace"]
+                
+                Write-Output "Creating Private Key PEM"
+                $key = $OctopusParameters["lmkcloud_certificate.PrivateKeyPem"]
+                
+                Write-Output "Creating Certificate PEM"
+                $crt = $OctopusParameters["lmkcloud_certificate.CertificatePem"]
+                
+                Write-Output "Creating Output Variables"
+                Set-OctopusVariable -name "privateKeyVariable" -value $key
+                Set-OctopusVariable -name "certificateVariable" -value $crt
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+    }
+}
+
+step "deploy-secret-tls" {
+    name = "Deploy Secret - tls"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps/Kubernetes/Yaml/certificate.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "True"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps/Kubernetes/Yaml/certificate.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "istio-gateway-rules" {
+    name = "Istio Gateway Rules"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\istioRulesHTTPD.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\istioRulesHTTPD.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}

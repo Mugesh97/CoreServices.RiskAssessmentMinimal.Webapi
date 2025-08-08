@@ -1,0 +1,83 @@
+pr: none
+trigger: none
+schedules:
+  - cron: 30 6 * * 1-5
+    displayName: Run weekdays at 6:30am (UTC)
+    branches:
+      include:
+        - main
+    always: true
+
+variables:
+- name: major
+  value: 1
+- name: minor
+  value: 0
+- name: patch
+  value: $[counter(format('{0}.{1}-{2}', variables['major'], variables['minor'], variables['Build.SourceBranchName']), 1)]
+- name: branch
+  ${{ if eq( variables['Build.SourceBranchName'], 'main' ) }}:
+    value: ''
+  ${{ if ne( variables['Build.SourceBranchName'], 'main' ) }}:
+    value: -${{ variables['Build.SourceBranchName'] }}
+- template: ./Templates/Variables/variables-bvt.yml
+- group: performance-tests-bvt
+
+name: $(major).$(minor).$(patch)$(branch)
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Performance_Tests
+  jobs:
+  - job: Run_Performance_Tests
+    displayName: Run Performance Tests
+    steps:
+      ### Get the access token to access service via ApiHub
+      - task: AzureCLI@2
+        name: Output_Access_Token_ApiHub
+        displayName: Output Access Token - ApiHUb
+        inputs:
+          azureSubscription: ${{ variables.serviceConnectionName }}
+          scriptType: pscore
+          scriptLocation: inlineScript
+          inlineScript: |
+            $tokenApiHub = az account get-access-token --resource ${{ variables.appIdUriApiHub }} --query 'accessToken' -o tsv
+            $tokenApiWithBearer = "Bearer " + $tokenApiHub
+            write-host $tokenApiWithBearer
+            Write-Output ("##vso[task.setvariable variable=AuthTokenApiHub;isOutput=true]{0}" -f $tokenApiWithBearer)
+          failOnStandardError: true
+
+      ### Set the access token outputs as pipeline variables
+      - task: CmdLine@2
+        name: Set_Outputs_As_Variables
+        displayName: Set Outputs as Variables
+        inputs:
+          script: |
+            echo "##vso[task.setvariable variable=ServiceInternalApiHubAuthKeyValue;]$(Output_Access_Token_ApiHub.AuthTokenApiHub)"
+          failOnStderr: true
+
+      ### Run the k6 performance tests
+      - task: k6-load-test@0
+        displayName: Run k6 Load Test
+        inputs:
+          args: 
+            -e vus=$(vus)
+            -e maxVus=$(maxVus)
+            -e duration=$(duration)
+            -e baseURL=$(baseURL)
+            -e ApplicationId=$(ApplicationId)
+            -e LandmarkCallerIdHeaderValue=$(LandmarkCallerIdHeaderValue)
+            -e AccountId=$(AccountId)
+            -e PanelAccountId=$(PanelAccountId)
+            -e stressTest=$(stressTest)
+            -e accessToken=`"$(serviceInternalApiHubAuthKeyValue)"`
+          filename: "./CoreServices.TransactionRequestService.PerformanceTests/transactionrequest-service.k6-load-test.js"
+
+      ### Publish the k6 summary report
+      - task: PublishHtmlReport@1
+        condition: always()
+        displayName: "Publish k6 Summary Report"
+        inputs:
+          reportDir: "summary.html"
