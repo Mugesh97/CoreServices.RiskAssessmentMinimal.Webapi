@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tagsParam": {
+      "value": {
+        "application": "#{tags.application}#",
+        "businessArea": "#{tags.businessArea}#",
+        "dataClassification": "#{tags.dataClassification}#",
+        "environment": "#{tags.environment}#",
+        "version": "#{tags.version}#"
+      }
+    },
+    "resourceGroupUKSParam": {
+      "value": {
+        "name": "#{resourceGroupUKS.name}#",
+        "location": "#{resourceGroupUKS.location}#"
+      }
+    },
+    "logAnalyticsParam": {
+      "value": {
+        "name": "#{logAnalytics.name}#",
+        "retentionInDays": "#{logAnalytics.retentionInDays}#",
+        "dailyQuotaGb": "#{logAnalytics.dailyQuotaGb}#",
+        "resourceGroup": "#{logAnalytics.resourceGroup}#"
+      }
+    },
+    "applicationInsightsParam": {
+      "value": {
+        "name": "#{applicationInsights.name}#",
+        "resourceGroup": "#{applicationInsights.resourceGroup}#"
+        
+      }
+    }
+  }
+}

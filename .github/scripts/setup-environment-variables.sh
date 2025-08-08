@@ -1,0 +1,1 @@
+cat $CONFIG_FILE >> $GITHUB_ENV

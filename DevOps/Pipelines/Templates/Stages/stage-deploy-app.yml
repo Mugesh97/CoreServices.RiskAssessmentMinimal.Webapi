@@ -1,0 +1,97 @@
+parameters:
+- name: name
+  displayName: Stage Name
+  type: string
+
+- name: displayName
+  displayName: Stage Display Name
+  type: string
+
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+- name: environment
+  displayName: Environment
+  type: string
+
+stages:
+- stage: ${{ parameters.name }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  jobs:
+  - deployment: Deploy_via_Octopus
+    displayName: Deploy via Octopus
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          # - task: PowerShell@2
+          #   name: List_Build_Context
+          #   displayName: "List Build Context"
+          #   inputs:
+          #     targetType: 'inline'
+          #     script: 'Get-ChildItem -Recurse $(Pipeline.Workspace)'
+           ### Build docker container image
+          - task: Docker@2
+            name: Build_Docker_Container_Image
+            displayName: Build Docker Container Image
+            inputs:
+              repository: ${{ variables.repositoryInternalName }}
+              command: build
+              dockerfile: $(Pipeline.Workspace)/dockerFile/DockerFile
+              buildContext: $(Pipeline.Workspace)/webApi
+              tags: latest
+              addPipelineData: false
+
+          ### Push docker container image to AWS ECR
+          - task: ECRPushImage@1
+            name: Push_Docker_Container_Image
+            displayName: Push Docker Container Image
+            inputs:
+              awsCredentials: ${{ variables.awsCredentials }}
+              regionName: ${{ variables.awsRegion }}
+              imageSource: imagename
+              sourceImageName: ${{ variables.repositoryInternalName }}
+              sourceImageTag: latest
+              repositoryName: ${{ variables.repositoryInternalName }}
+              pushTag: $(Build.BuildNumber)
+          
+          ### Create the release
+          - task: OctopusCreateRelease@6
+            name: create_release
+            displayName: Creating Octopus Release
+            inputs:
+              OctoConnectedServiceName: OctopusDeploy-EDRS Action Listener
+              Space: Default
+              Project: $(octopusProjectName)
+              GitRef: $(Build.SourceBranchName)
+              ReleaseNumber: $(Build.BuildNumber) 
+    
+          ### Deploy the release
+          - task: OctopusDeployRelease@6
+            name: deploy_the_release
+            displayName: Releasing to Development
+            inputs:
+              OctoConnectedServiceName: OctopusDeploy-EDRS Action Listener
+              Space: Default
+              Project: $(octopusProjectName)
+              ReleaseNumber: $(Build.BuildNumber)
+              Environments: Development

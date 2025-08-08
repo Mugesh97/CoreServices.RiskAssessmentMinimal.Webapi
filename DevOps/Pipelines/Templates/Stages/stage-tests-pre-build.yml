@@ -1,0 +1,43 @@
+parameters:
+- name: name
+  displayName: Stage Name
+  type: string
+
+- name: displayName
+  displayName: Stage Display Name
+  type: string
+
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+stages:
+- stage: ${{ parameters.name }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  jobs:
+  ### Snyk tests
+  - template: ../Jobs/job-tests-snyk.yml
+    parameters:
+      variables: ${{ parameters.variables }}
+
+  ### Unit tests
+  - template: ../Jobs/job-tests-unit.yml
+    parameters:
+      variables: ${{ parameters.variables }}

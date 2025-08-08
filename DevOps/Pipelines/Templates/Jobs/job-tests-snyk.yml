@@ -1,0 +1,54 @@
+parameters:
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+jobs:
+- job: Run_Snyk_Tests
+  displayName: Run Snyk Tests
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  steps:
+  ### Install required .Net version
+  - task: UseDotNet@2
+    name: Use_Dot_Net_Version
+    displayName: Use .NET ${{ variables.dotNetVersion }}
+    inputs:
+      packageType: sdk
+      version: ${{ variables.dotNetVersion }}
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  ### Restore NuGet packages
+  - task: DotNetCoreCLI@2
+    name: Restore_NuGet_Packages
+    displayName: Restore NuGet Packages
+    inputs:
+      command: restore
+      feedsToUse: config
+      nugetConfigPath: ${{ variables.nugetConfigPath }}
+
+  ### Run Snyk tests
+  - task: SnykSecurityScan@1
+    name: Run_Snyk_Tests
+    displayName: Run Snyk Tests
+    inputs:
+      serviceConnectionEndpoint: Snyk - Core Services-EDRS Action Listener
+      testType: app
+      monitorWhen: never
+      failOnIssues: true
+      additionalArguments: --all-projects --policy-path=.snyk

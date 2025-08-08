@@ -1,0 +1,45 @@
+variable "environment" {
+    value "bvt" {
+        environment = ["development"]
+    }
+
+    value "uat" {
+        environment = ["staging"]
+    }
+
+    value "prd" {
+        environment = ["production"]
+    }
+}
+
+variable "ingressGateway_name" {
+    value "edrs-action-listener-ingressgateway-#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "namespace" {
+    value "edrs-action-listener-#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "service_name" {
+    value "edrs-action-listener-webapi-#{environment}" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "service_url" {
+    value "core-#{environment}-edrs-action-listener.lmkcloud.net" {
+        environment = ["development", "staging", "production"]
+    }
+}
+
+variable "lmkcloud_certificate" {
+    type = "Certificate"
+
+    value "Certificates-41" {
+        environment = ["development", "staging", "production"]
+    }
+}

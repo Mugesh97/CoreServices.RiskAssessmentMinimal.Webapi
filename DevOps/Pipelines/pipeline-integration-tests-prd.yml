@@ -1,0 +1,129 @@
+pr: none
+trigger: none
+schedules:
+  - cron: 15 7 * * 1-5
+    displayName: Run weekdays at 7:15am (UTC)
+    branches:
+      include:
+        - main
+    always: true
+
+variables:
+- name: major
+  value: 1
+- name: minor
+  value: 0
+- name: patch
+  value: $[counter(format('{0}.{1}-{2}', variables['major'], variables['minor'], variables['Build.SourceBranchName']), 1)]
+- name: branch
+  ${{ if eq( variables['Build.SourceBranchName'], 'main' ) }}:
+    value: ''
+  ${{ if ne( variables['Build.SourceBranchName'], 'main' ) }}:
+    value: -${{ variables['Build.SourceBranchName'] }}
+- template: ./Templates/Variables/variables-global.yml
+- template: ./Templates/Variables/variables-prd.yml
+- group: integration-tests-prd
+
+name: $(major).$(minor).$(patch)$(branch)
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Integration_Tests
+  jobs:
+  - job: Run_Integration_Tests
+    displayName: Run Integration Tests
+    steps:
+      ### Install newman html reporter
+      - task: Npm@1
+        displayName: Install newman htmlextra reporter
+        inputs:
+          command: custom
+          customCommand: install -g newman-reporter-htmlextra
+
+      ### Get the access token to access service directly
+      - task: AzureCLI@2
+        name: Output_Access_Token_Direct
+        displayName: Output Access Token - Direct
+        inputs:
+          azureSubscription: ${{ variables.serviceConnectionName }}
+          scriptType: pscore
+          scriptLocation: inlineScript
+          inlineScript: |
+            $tokenDirect = az account get-access-token --resource ${{ variables.appIdUriDirect }} --query 'accessToken' -o tsv
+            $tokenWithBearer = "Bearer " + $tokenDirect
+            write-host $tokenWithBearer
+            Write-Output ("##vso[task.setvariable variable=AuthTokenDirect;isOutput=true]{0}" -f $tokenWithBearer)
+          failOnStandardError: true
+
+      ### Get the access token to access service via ApiHub
+      - task: AzureCLI@2
+        name: Output_Access_Token_ApiHub
+        displayName: Output Access Token - ApiHUb
+        inputs:
+          azureSubscription: ${{ variables.serviceConnectionName }}
+          scriptType: pscore
+          scriptLocation: inlineScript
+          inlineScript: |
+            $tokenApiHub = az account get-access-token --resource ${{ variables.appIdUriApiHub }} --query 'accessToken' -o tsv
+            $tokenApiWithBearer = "Bearer " + $tokenApiHub
+            write-host $tokenApiWithBearer
+            Write-Output ("##vso[task.setvariable variable=AuthTokenApiHub;isOutput=true]{0}" -f $tokenApiWithBearer)
+          failOnStandardError: true
+
+      ### Set the access token outputs as pipeline variables
+      - task: CmdLine@2
+        name: Set_Outputs_As_Variables
+        displayName: Set Outputs as Variables
+        inputs:
+          script: |
+            echo "##vso[task.setvariable variable=ServiceInternalDirectAuthKeyValue;]$(Output_Access_Token_Direct.AuthTokenDirect)"
+            echo "##vso[task.setvariable variable=ServiceInternalApiHubAuthKeyValue;]$(Output_Access_Token_ApiHub.AuthTokenApiHub)"
+          failOnStderr: true
+
+      ### Update values in Postman environment file
+      - task: replacetokens@5
+        name: Update_Postman_Environment_File
+        displayName: Update Postman Environment File
+        inputs:
+          targetFiles: ${{ variables.integrationTestsSourceFolder }}/${{ variables.postmanEnvironmentFile }}
+          encoding: auto
+          tokenPattern: default
+          writeBOM: true
+          escapeType: none
+          verbosity: detailed
+          actionOnMissing: warn
+          keepToken: false
+          actionOnNoFiles: warn
+          enableTransforms: false
+          enableRecursion: false
+          useLegacyPattern: false
+          enableTelemetry: false
+
+      ### Run Postman integration tests
+      - task: CmdLine@2
+        name: Run_Postman_Collection
+        displayName: Run Postman Collection
+        inputs:
+          script: newman run "${{ variables.integrationTestsSourceFolder }}/${{ variables.postmanCollectionFile }}" --environment "${{ variables.integrationTestsSourceFolder }}/${{ variables.postmanEnvironmentFile }}" --reporters "cli,junit,htmlextra" --reporter-junit-export testResults.xml --reporter-htmlextra-export report.html --working-dir "${{ variables.integrationTestsSourceFolder }}" --disable-unicode
+          failOnStderr: true
+
+      ### Publish test results
+      - task: PublishTestResults@2
+        name: Publish_Test_Results
+        displayName: Publish Test Results
+        condition: always()
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: testResults.xml
+          failTaskOnFailedTests: false
+          testRunTitle: Integration Postman Tests
+
+      ### Publish html report
+      - task: JakubRumpca.azure-pipelines-html-report.PublishHtmlReport.PublishHtmlReport@1
+        name: Publish_HTML_Report
+        displayName: Publish HTML Report
+        condition: always()  
+        inputs:
+          reportDir: report.html

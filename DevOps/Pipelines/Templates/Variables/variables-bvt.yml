@@ -1,0 +1,17 @@
+variables:
+  ### Pipeline variables
+  serviceConnectionName: eng-coreservices-edrs-action-listener-dev
+  octopusProjectName: 2 - Deploy EDRS Action Listener
+  appIdUriDirect: api://eng-core-bvt-actionlistener-webapi-internal
+  appIdUriApiHub: api://eng-core-bvt-actionlistener-webapi-internal-permissions
+
+  ### Bicep variables
+  tags.environment: BVT
+  resourceGroupUKS.name: core-bvt-actionlistener-webapi-uks
+  resourceGroupUKS.location: uksouth
+  logAnalytics.name: core-bvt-actionlistener-webapi-loganalytics-uks
+  logAnalytics.retentionInDays: 30
+  logAnalytics.dailyQuotaGb: 1
+  logAnalytics.resourceGroup: $(resourceGroupUKS.name)
+  applicationInsights.name: core-bvt-actionlistener-webapi-appinsights-uks
+  applicationInsights.resourceGroup: $(resourceGroupUKS.name)

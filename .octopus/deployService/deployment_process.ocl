@@ -1,0 +1,60 @@
+step "deploy-config-map" {
+    name = "Deploy Config Map"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\configmap.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\configmap.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "deploy-service" {
+    name = "Deploy Service"
+    properties = {
+        Octopus.Action.TargetRoles = "kube-cluster-1,kube-cluster-2"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployRawYaml"
+        properties = {
+            Octopus.Action.GitRepository.FilePathFilters = "DevOps\\Kubernetes\\Yaml\\deployment.yml"
+            Octopus.Action.GitRepository.Source = "Project"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.Kubernetes.ServerSideApply.Enabled = "False"
+            Octopus.Action.Kubernetes.ServerSideApply.ForceConflicts = "False"
+            Octopus.Action.KubernetesContainers.CustomResourceYamlFileName = "DevOps\\Kubernetes\\Yaml\\deployment.yml"
+            Octopus.Action.Script.ScriptSource = "GitRepository"
+        }
+    }
+}
+
+step "run-azure-devops-integration-test-pipeline" {
+    name = "Run Azure DevOps Integration Test Pipeline"
+
+    action {
+        excluded_environments = ["production"]
+        properties = {
+            AzureDevOpsAccessKey = "#{azureDevOps_AccessKey}"
+            AzureDevOpsBranch = "#{Octopus.Release.Git.BranchName}"
+            AzureDevOpsOrganizationName = "#{azureDevOps_OrganizationName}"
+            AzureDevOpsPipelineName = "#{azureDevOps_PipelineName}"
+            AzureDevOpsProjectName = "#{azureDevOps_ProjectName}"
+            AzureDevOpsWaitUntilCompletion = "True"
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Template.Id = "ActionTemplates-102"
+            Octopus.Action.Template.Version = "2"
+        }
+    }
+}

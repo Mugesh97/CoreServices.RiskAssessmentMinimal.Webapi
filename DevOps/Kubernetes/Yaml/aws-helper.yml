@@ -1,0 +1,39 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: ecr-token-helper
+  namespace: '#{namespace}'
+spec:
+  schedule: '0 */8 * * *' # every 8 hours, since credentials expire every 12 hours
+  suspend: false
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      name: ecr-token-helper
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 250
+      ttlSecondsAfterFinished: 100
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          serviceAccountName: '#{service_name}-sa'
+          restartPolicy: Never
+          containers:
+            - name: update-secret
+              image: public.ecr.aws/dnxsolutions/docker-kube-tools:latest # Anything that contains kubectl + aws cli
+              command:
+                - /bin/bash
+                - "-c"
+                - |
+                  PASSWORD=`aws ecr get-login-password --region $AWS_REGION | cut -d' ' -f6`
+                  kubectl delete secret -n $SERVICENAMESPACE --ignore-not-found $SECRET_NAME
+                  kubectl create secret -n $SERVICENAMESPACE docker-registry $SECRET_NAME --docker-server=$ECR_REPOSITORY --docker-username=AWS --docker-password=$PASSWORD
+                  kubectl patch serviceaccount $SERVICEACCOUNT -p '{"imagePullSecrets":[{"name":"'$SECRET_NAME'"}]}' -n $SERVICENAMESPACE
+              envFrom:
+              - configMapRef:
+                  name: '#{awsHelper_configMap_name}'

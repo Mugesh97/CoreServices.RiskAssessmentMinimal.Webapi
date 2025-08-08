@@ -1,0 +1,100 @@
+name: Scan project with SonarCloud
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  ubuntu_scan:
+    name: Scan project with SonarCloud (Ubuntu)
+    runs-on: ubuntu-latest
+
+    env:
+      CONFIG_FILE: ./.github/config/sonar.env
+      SCANNER_DIRECTORY: ./.sonar/scanner/
+
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ vars.SONARCLOUD_JAVA_VERSION }}
+          distribution: ${{ vars.SONARCLOUD_JAVA_DIST }}
+
+      - name: Setup multiple .NET SDKs
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            8.0.x
+
+      - name: Checkout project
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Ensure full history is fetched
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v3
+        with:
+          path: ~/sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarQube scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: ./.sonar/scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Add NuGet packages with credentials
+        run: |
+          dotnet nuget remove source nuget.org
+          dotnet nuget remove source lmk-onprem-deployments
+          dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
+          dotnet nuget add source https://pkgs.dev.azure.com/lmk-onprem-deployments/_packaging/lmk-onprem-deployments/nuget/v3/index.json -n LandmarkCore -u "${{ secrets.REGISTRY_USER }}" -p "${{ secrets.PACKAGE_TOKEN }}" --store-password-in-clear-text
+
+      - name: Restore packages
+        run: bash ./.github/scripts/restore-packages.sh
+
+      - name: Install SonarQube scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        run: bash ./.github/scripts/install-sonar-scanner.sh
+
+      - name: Setup environment variables
+        run: bash ./.github/scripts/setup-environment-variables.sh
+
+      - name: Create SonarCloud project
+        env:
+          SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: bash ./.github/scripts/create-sonar-project.sh
+
+      - name: Rename SonarCloud main branch
+        env:
+          SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_MAIN_BRANCH_NAME: ${{ github.event.repository.default_branch }}
+        run: bash ./.github/scripts/rename-sonar-main-branch.sh
+
+      - name: Begin Sonar scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: bash ./.github/scripts/begin-sonar-scan.sh
+
+      - name: Build projects
+        run: bash ./.github/scripts/build-projects.sh
+
+      - name: Run unit tests
+        run: bash ./.github/scripts/run-unit-tests.sh
+
+      - name: End Sonar scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: bash ./.github/scripts/end-sonar-scan.sh

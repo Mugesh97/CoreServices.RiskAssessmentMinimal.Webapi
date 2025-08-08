@@ -1,0 +1,75 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: '#{service_configMap_name}'
+  namespace: '#{namespace}'
+data:
+  http_proxy: '#{appSettings_HTTP_PROXY}'
+  HTTP_PROXY: '#{appSettings_HTTP_PROXY}'
+  HTTPS_PROXY: '#{appSettings_HTTPS_PROXY}'
+  NO_PROXY: '#{appSettings_NO_PROXY}'
+  ASPNETCORE_ENVIRONMENT: '#{appSettings_ASPNETCORE_ENVIRONMENT}'
+  AZURE_TENANT_ID: '#{appSettings_AZURE_TENANT_ID}'
+  AZURE_CLIENT_ID: '#{appSettings_AZURE_CLIENT_ID}'
+  AZURE_CLIENT_SECRET: '#{appSettings_AZURE_CLIENT_SECRET}'
+  ApplicationInsights__ConnectionString: '#{appSettings_ApplicationInsights__ConnectionString}'
+  
+  #RabbitMqSettings
+  RabbitMqSettings__HostName: '#{appSettings_RabbitMqSettings__HostName}'
+  RabbitMqSettings__UserName: '#{appSettings_RabbitMqSettings__UserName}'
+  RabbitMqSettings__Password: '#{appSettings_RabbitMqSettings__Password}'
+  RabbitMqSettings__Queue: '#{appSettings_RabbitMqSettings__Queue}'
+  RabbitMqSettings__Port: '#{appSettings_RabbitMqSettings__Port}'
+  RabbitMqSettings__DeadLetterQueue: '#{appSettings_RabbitMqSettings__DeadLetterQueue}'
+  RabbitMqSettings__DeadLetterExchange: '#{appSettings_RabbitMqSettings__DeadLetterExchange}'
+  
+  ConnectionStrings__PostgresConnection : '#{appSettings_ConnectionStrings__PostgresConnection}'
+
+  # AzureAccessTokenServiceSettings
+  AzureAccessTokenServiceSettings__GetAccessTokenUsingAzureLogin: '#{appSettings_AzureAccessTokenServiceSettings__GetAccessTokenUsingAzureLogin}'
+  AzureAccessTokenServiceSettings__TenantId: '#{appSettings_AzureAccessTokenServiceSettings__TenantId}'
+  AzureAccessTokenServiceSettings__TokenAuthority: '#{appSettings_AzureAccessTokenServiceSettings__TokenAuthority}'
+  AzureAccessTokenServiceSettings__ClientSecret: '#{appSettings_AzureAccessTokenServiceSettings__ClientSecret}'
+  AzureAccessTokenServiceSettings__ClientId: '#{appSettings_AzureAccessTokenServiceSettings__ClientId}'
+  # TokenValidatorSettings
+  TokenValidatorSettings__AzureActiveDirectoryIssuer: '#{appSettings_TokenValidatorSettings__AzureActiveDirectoryIssuer}'
+  TokenValidatorSettings__ResourceAppIdUri: '#{appSettings_TokenValidatorSettings__ResourceAppIdUri}'
+  TokenValidatorSettings__ApplicationName: '#{appSettings_TokenValidatorSettings__ApplicationName}'
+  TokenValidatorSettings__Active: '#{appSettings_TokenValidatorSettings__Active}'
+  # SchemaValidationSettings
+  SchemaValidationSettings__Mode: '#{appSettings_SchemaValidationSettings__Mode}'
+  SchemaValidationSettings__NewtonSoftSchemaKey: '#{appSettings_SchemaValidationSettings__NewtonSoftSchemaKey}'
+  SchemaValidationSettings__PermissionOpenApiAttribute: '#{appSettings_SchemaValidationSettings__PermissionOpenApiAttribute}'
+  SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryUrl: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryUrl}'
+  SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryIssuer: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__AzureActiveDirectoryIssuer}'
+  SchemaValidationSettings__AuthenticationSettings__Audience: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__Audience}'
+  SchemaValidationSettings__AuthenticationSettings__EntitlementServiceUrl: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__EntitlementServiceUrl}'
+  SchemaValidationSettings__AuthenticationSettings__EntitlementServiceTokenIssuer: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__EntitlementServiceTokenIssuer}'
+  SchemaValidationSettings__AuthenticationSettings__SchemaServiceUrl: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__SchemaServiceUrl}'
+  SchemaValidationSettings__AuthenticationSettings__SchemaServiceAppIdUri: '#{appSettings_SchemaValidationSettings__AuthenticationSettings__SchemaServiceAppIdUri}'
+  
+  # HmlrEndPointSettings
+  HmlrEndPointSettings__HmlrEdrsBaseUrl: '#{appSettings_HmlrEndPointSettings__HmlrEdrsBaseUrl}'
+  HmlrEndPointSettings__HmlrRequisitionPollRequestWebService: '#{appSettings_HmlrEndPointSettings__HmlrRequisitionPollRequestWebService}'
+  HmlrEndPointSettings__HmlrSubmitCaseWebService : '#{appSettings_HmlrEndPointSettings__HmlrSubmitCaseWebService}'
+  HmlrEndPointSettings__HmlrAttachmentCaseWebService: '#{appSettings_HmlrEndPointSettings__HmlrAttachmentCaseWebService}'
+  HmlrEndPointSettings__HmlrAttachmentPollRequestWebService: '#{appSettings_HmlrEndPointSettings__HmlrAttachmentPollRequestWebService}'
+  HmlrEndPointSettings__HmlrEarlyCompletionRequestWebService: '#{appSettings_HmlrEndPointSettings__HmlrEarlyCompletionRequestWebService}'
+  HmlrEndPointSettings__HmlrSubmitPollRequestWebService : '#{appSettings_HmlrEndPointSettings__HmlrSubmitPollRequestWebService}'
+  HmlrEndPointSettings__HmlrOutstandingPollRequestWebService: '#{appSettings_HmlrEndPointSettings__HmlrOutstandingPollRequestWebService}'
+  HmlrEndPointSettings__ECSSCALLBACKURL : '#{appSettings_HmlrEndPointSettings__ECSSCALLBACKURL}'
+  HmlrEndPointSettings__ECSSServiceAppId : '#{appSettings_HmlrEndPointSettings__ECSSServiceAppId}'
+
+  # HmlrCertificateSettings
+  HmlrCertificateSettings__VAULT_ROLE: '#{appSettings_HmlrCertificateSettings__VAULT_ROLE}'
+  HmlrCertificateSettings__VAULT_ADDR: '#{appSettings_HmlrCertificateSettings__VAULT_ADDR}'
+  HmlrCertificateSettings__SA_TOKEN_PATH: '#{appSettings_HmlrCertificateSettings__SA_TOKEN_PATH}'
+  HmlrCertificateSettings__VAULT_PATH: '#{appSettings_HmlrCertificateSettings__VAULT_PATH}'
+  HmlrCertificateSettings__VAULT_MOUNT: '#{appSettings_HmlrCertificateSettings__VAULT_MOUNT}'
+  HmlrCertificateSettings__CertifcateSecretName: '#{appSettings_HmlrCertificateSettings__CertifcateSecretName}'
+  HmlrCertificateSettings__CertifcatePasswordSecretName: '#{appSettings_HmlrCertificateSettings__CertifcatePasswordSecretName}'
+  HmlrCertificateSettings__hmlrRootCA : '#{appSettings_HmlrCertificateSettings__hmlrRootCA}'
+  HmlrCertificateSettings__hmlrIssuingCA : '#{appSettings_HmlrCertificateSettings__hmlrIssuingCA}'
+
+  # EnvironmentSettings
+  EnvironmentSettings__Environment: '#{appSettings_EnvironmentSettings__Environment}'

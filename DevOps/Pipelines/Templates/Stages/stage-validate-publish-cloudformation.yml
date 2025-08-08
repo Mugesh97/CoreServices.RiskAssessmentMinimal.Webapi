@@ -1,0 +1,69 @@
+parameters:
+- name: name
+  displayName: Stage Name
+  type: string
+
+- name: displayName
+  displayName: Stage Display Name
+  type: string
+
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+stages:
+- stage: ${{ parameters.name }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  jobs:
+  - job: Validate_Publish_CloudFormation_Files
+    displayName: Validate & Publish CloudFormation Files
+    steps:
+    ### Install CloudFormation template linter
+    - task: CmdLine@2
+      name: Install_AWS_CloudFormation_Linter
+      displayName: Install AWS CloudFormation Linter
+      inputs:
+        script: pip install cfn-lint
+        failOnStderr: true
+
+    ### Validate CloudFormation template with linter
+    - task: CmdLine@2
+      name: Validate_CloudFormation_Template
+      displayName: Validate CloudFormation Template
+      inputs:
+        script: cfn-lint -i W3010 -t ${{ variables.cloudFormationTemplatesSourceFolder }}/cf-template.yml
+        failOnStderr: true
+
+    ### Validate CloudFormation paramters file is valid json
+    - task: CmdLine@2
+      name: Validate_CloudFormation_Parameters_File
+      displayName: Validate CloudFormation Parameters File
+      inputs:
+        script: jq . ${{ variables.cloudFormationTemplatesSourceFolder }}/cf-template.parameters.json
+        failOnStderr: true
+
+    ### Publish CloudFormation templates pipeline artifact
+    - task: PublishBuildArtifacts@1
+      name: Publish_CloudFormation_Files
+      displayName: Publish CloudFormation Files
+      inputs:
+        PathtoPublish: ${{ variables.cloudFormationTemplatesSourceFolder }}
+        ArtifactName: cloudFormationTemplates
+        publishLocation: Container

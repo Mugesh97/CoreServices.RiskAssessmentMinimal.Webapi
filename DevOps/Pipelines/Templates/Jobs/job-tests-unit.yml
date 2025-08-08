@@ -1,0 +1,57 @@
+parameters:
+- name: dependsOn
+  displayName: Depends On
+  type: object
+  default: ''
+
+- name: condition
+  displayName: Condition
+  type: string
+  default: ''
+
+- name: variables
+  displayName: Variables
+  type: object
+  default: ''
+
+jobs:
+- job: Run_Unit_Tests
+  displayName: Run Unit Tests
+  ${{ if not(eq(parameters.dependsOn, '')) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ if not(eq(parameters.condition, '')) }}:
+    condition: ${{ parameters.condition }}
+  ${{ if not(eq(parameters.variables, '')) }}:
+    variables: ${{ parameters.variables }}
+  steps:
+  ### Install required .Net version  
+  - task: UseDotNet@2
+    name: Use_Dot_Net_Version_8
+    displayName: Use .NET ${{ variables.dotNetVersion }}
+    inputs:
+      packageType: sdk
+      version: ${{ variables.dotNetVersion }}
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  # - script: |
+  #     choco install netfx-4.8-devpack --yes
+  #   displayName: Install .NET Framework 4.8 Developer Pack
+
+ ### Restore NuGet packages
+  - task: DotNetCoreCLI@2
+    name: Restore_NuGet_Packages
+    displayName: Restore NuGet Packages
+    inputs:
+      command: restore
+      feedsToUse: config
+      nugetConfigPath: ${{ variables.nugetConfigPath }}
+
+  ### Run unit tests
+  - task: DotNetCoreCLI@2
+    name: Run_Unit_Tests
+    displayName: Run Unit Tests
+    inputs:
+      command: test
+      projects: ${{ variables.unitTestsProject }}
+      arguments: --no-restore --collect "Code coverage"
+      testRunTitle: Unit Tests

@@ -1,0 +1,16 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: '#{awsHelper_configMap_name}'
+  namespace: '#{namespace}'
+data:
+  AWS_ACCESS_KEY_ID: '#{awsHelper_configmap_AWS_ACCESS_KEY_ID}'
+  AWS_REGION: '#{awsHelper_configmap_AWS_REGION}'
+  AWS_SECRET_ACCESS_KEY: '#{awsHelper_configmap_AWS_SECRET_ACCESS_KEY}'
+  ECR_REPOSITORY:  '#{awsHelper_configmap_ECR_REPOSITORY}'
+  HTTP_PROXY: '#{awsHelper_configmap_HTTP_PROXY}'
+  HTTPS_PROXY: '#{awsHelper_configmap_HTTPS_PROXY}'
+  NO_PROXY: '#{awsHelper_configmap_NO_PROXY}'
+  SECRET_NAME: '#{awsHelper_configmap_SECRET_NAME}'
+  SERVICENAMESPACE: '#{awsHelper_configmap_SERVICENAMESPACE}'
+  SERVICEACCOUNT: '#{service_name}-sa'

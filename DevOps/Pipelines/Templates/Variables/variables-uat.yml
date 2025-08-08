@@ -1,0 +1,16 @@
+variables:
+  ### Pipeline variables
+  serviceConnectionName: eng-coreservices-edrs-action-listener-uat
+  appIdUriDirect: api://eng-core-uat-actionlistener-webapi-internal
+  appIdUriApiHub: api://eng-core-uat-actionlistener-webapi-internal-permissions
+
+  ### Bicep variables
+  tags.environment: UAT
+  resourceGroupUKS.name: core-uat-actionlistener-webapi-uks
+  resourceGroupUKS.location: uksouth
+  logAnalytics.name: core-uat-actionlistener-webapi-loganalytics-uks
+  logAnalytics.retentionInDays: 30
+  logAnalytics.dailyQuotaGb: 1
+  logAnalytics.resourceGroup: $(resourceGroupUKS.name)
+  applicationInsights.name: core-uat-actionlistener-webapi-appinsights-uks
+  applicationInsights.resourceGroup: $(resourceGroupUKS.name)

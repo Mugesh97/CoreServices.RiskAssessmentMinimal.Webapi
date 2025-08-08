@@ -1,0 +1,20 @@
+variables:
+  awsCredentials: AWS Core Services - Live-EDRS Action Listener
+  cloudFormationTemplatesSourceFolder: $(Build.Repository.LocalPath)/DevOps/Infrastructure/CloudFormation
+  bicepTemplatesSourceFolder: $(Build.Repository.LocalPath)/DevOps/Infrastructure/Bicep
+  dockerFile: $(Build.Repository.LocalPath)/DockerFile
+  nugetConfigPath: $(Build.Repository.LocalPath)/nuget.config
+  unitTestsProject: $(Build.Repository.LocalPath)/Edrs.ActionListenerService.UnitTests/Edrs.ActionListenerService.UnitTests.csproj
+  webApiProject: $(Build.Repository.LocalPath)/Edrs.ActionListenerService.Webapi/Edrs.ActionListenerService.Webapi.csproj
+  integrationTestsSourceFolder: $(Build.Repository.LocalPath)/Edrs.ActionListenerService.IntegrationTests
+  postmanEnvironmentFile: Edrs.ActionListenerService-AzureDevops.postman_environment.json
+  postmanCollectionFile: Edrs.ActionListenerService.postman_collection.json
+  awsRegion: eu-west-1
+  awsStackName: core-edrs-actionlistener-service
+  repositoryInternalName: core-actionlistener-service-onprem
+  environment: prd
+  dotNetVersion: 8.x
+  tags.application: EDRS action lister 
+  tags.businessArea: Core-Services
+  tags.dataClassification: Company Internal
+  tags.version: $(Build.BuildNumber)
